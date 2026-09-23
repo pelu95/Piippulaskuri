@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Piipunpeltien leikkauslaskuri</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
+header{background:#111827;color:white;padding:16px;position:sticky;top:0;z-index:5}
+h1{font-size:20px;margin:0 0 12px}.tabs{display:flex;gap:8px}.tab{border:0;border-radius:9px;padding:10px 18px;font-weight:bold;background:#374151;color:white}.tab.active{background:white;color:#111827}
+main{max-width:1100px;margin:auto;padding:14px}.grid{display:grid;grid-template-columns:340px 1fr;gap:14px}
+.card{background:white;border-radius:12px;padding:14px;box-shadow:0 1px 5px #0001;margin-bottom:14px}
+h2{font-size:17px;margin:0 0 12px}.fields{display:grid;grid-template-columns:1fr 110px;gap:8px;align-items:center}
+label{font-size:14px}input,select{width:100%;padding:9px;border:1px solid #cbd5e1;border-radius:7px;font-size:16px}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px solid #e5e7eb;padding:8px;text-align:left}th{background:#f8fafc}
+.badge{display:inline-block;padding:3px 7px;border-radius:10px;background:#e5e7eb;font-size:11px}.draw{overflow:auto}.draw svg{width:100%;min-width:500px;height:auto;background:#fff;border:1px solid #e5e7eb;border-radius:8px}
+.note{font-size:12px;color:#64748b}.hidden{display:none}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.fields{grid-template-columns:1fr 120px}main{padding:9px}.card{padding:11px}}
+</style>
+
+<style id="original-measure-drawings">
+.measure-section{margin-top:24px}
+.measure-section h2{margin-bottom:12px}
+.measure-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.measure-card{border:1px solid #ccc;border-radius:8px;padding:8px;background:#fff}
+.measure-card strong{display:block;margin-bottom:4px}
+.measure-card svg{display:block;width:100%;height:auto}
+.md-line{fill:none;stroke:#111;stroke-width:2}
+.md-dim{fill:none;stroke:#333;stroke-width:1}
+.md-guide{fill:none;stroke:#777;stroke-width:1;stroke-dasharray:4 4}
+.md-t{font:12px Arial,sans-serif;fill:#111}
+</style>
+</head>
+<body>
+<header><h1>Piipunpeltien leikkauslaskuri</h1><div class="tabs">
+<button class="tab active" onclick="setMode('lape')">Lape</button>
+<button class="tab" onclick="setMode('harja')">Harja</button>
+</div></header>
+<main>
+<div class="grid">
+<section>
+<div class="card" id="lapeInputs">
+<h2>Lape – mitat</h2><div class="fields">
+<label>Piipun leveys (cm)</label><input id="B5" type="number" value="27" step=".1">
+<label>Etukorkeus (cm)</label><input id="B6" type="number" value="42" step=".1">
+<label>Takakorkeus (cm)</label><input id="B7" type="number" value="31" step=".1">
+<label>Piipun syvyys (cm)</label><input id="B8" type="number" value="26" step=".1">
+<label>Oikea sivuhelma (cm)</label><input id="B9" type="number" value="0" step=".1">
+<label>Vasen sivuhelma (cm)</label><input id="B10" type="number" value="0" step=".1">
+<label>Etuhelma (cm)</label><input id="B11" type="number" value="0" step=".1">
+<label>Takahelma (cm)</label><input id="B12" type="number" value="0" step=".1">
+<label>Piipun tyyppi</label><select id="B14"><option>IV</option><option>Savupiippu</option></select>
+<label>Kattomateriaali</label><select id="B15"><option>T20</option><option>Classic</option><option>Tiilikainen</option><option>Huopa</option></select>
+<label>Piipunhattu</label><select id="B16"><option>Ei</option><option>Kyllä</option></select>
+<label>Hatun jalkojen määrä</label><input id="B17" type="number" value="2" min="0" step="1">
+<label>Helman leveyden lisä</label><input id="B21" type="number" readonly>
+<label>Helman pituuden lisä</label><input id="B22" type="number" readonly>
+</div></div>
+<div class="card hidden" id="harjaInputs">
+<h2>Harja – mitat</h2><div class="fields">
+<label>Piipun leveys (cm)</label><input id="B29" type="number" value="27" step=".1">
+<label>Piipun syvyys (cm)</label><input id="B30" type="number" value="26" step=".1">
+<label>Oikea helma (cm)</label><input id="B31" type="number" value="0" step=".1">
+<label>Vasen helma (cm)</label><input id="B32" type="number" value="0" step=".1">
+<label>1. päädyn korkeus (cm)</label><input id="B33" type="number" value="42" step=".1">
+<label>2. päädyn korkeus (cm)</label><input id="B34" type="number" value="31" step=".1">
+<label>Harjakohdan korkeus (cm)</label><input id="B35" type="number" value="50" step=".1">
+<label>Harjakohdan etäisyys 1. päädystä</label><input id="B36" type="number" value="13" step=".1">
+<label>Harjakohdan etäisyys 2. päädystä</label><input id="B37" type="number" value="13" step=".1">
+<label>Etuhelma 1 (cm)</label><input id="B38" type="number" value="0" step=".1">
+<label>Etuhelma 2 (cm)</label><input id="B39" type="number" value="0" step=".1">
+<label>Kattomateriaali</label><select id="B41"><option>T20</option><option>Classic</option><option>Tiilikainen</option><option>Huopa</option></select>
+<label>Piipun tyyppi</label><select id="B42"><option>IV</option><option>Savupiippu</option></select>
+<label>Piipunhattu</label><select id="B43"><option>Ei</option><option>Kyllä</option></select>
+<label>Hatun jalkojen määrä</label><input id="B44" type="number" value="2" min="0" step="1">
+<label>Helman leveyden lisä</label><input id="B47" type="number" readonly>
+<label>Helman pituuden lisä / pääty</label><input id="B48" type="number" readonly>
+<label>Helman pituuden lisä yhteensä</label><input id="B49" type="number" readonly>
+</div></div>
+</section>
+
+<section>
+<div class="card"><h2>Leikkauslista <span id="total" class="badge"></span></h2>
+<div id="cutlist"></div></div>
+<div class="card"><h2>Mittakuva</h2><div class="draw" id="drawing"></div></div>
+</section>
+</div>
+</main>
+<script>
+let mode='lape';
+const $=id=>document.getElementById(id), n=id=>+$(id).value||0;
+function mat(m){return {T20:[5,2.5],Classic:[15,4],Tiilikainen:[8,2.5],Huopa:[2,1]}[m]}
+function setMode(m){mode=m;document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('active',(m==='lape'?i===0:i===1)));$('lapeInputs').classList.toggle('hidden',m!=='lape');$('harjaInputs').classList.toggle('hidden',m!=='harja');calc()}
+document.addEventListener('input',calc);document.addEventListener('change',calc);
+function splitPiece(name,w,h){
+ if(w>125&&h>125)return [{name,w:125,h,seam:true},{name:name+' 2',w:w+3-125,h,seam:true}];
+ return [{name,w,h,seam:false},{name:name+' 2',w:null,h:null,seam:false}];
+}
+function render(rows){
+ let total=rows.reduce((s,r)=>s+(r.w&&r.h?r.w*r.h:0),0);
+ $('total').textContent='Yhteensä '+(total/10000).toFixed(2)+' m²';
+ let t='<table><tr><th>Pala</th><th>Leveys</th><th>Pituus/korkeus</th><th>m²</th><th>Sauma</th></tr>';
+ rows.forEach(r=>t+=`<tr><td>${r.name}</td><td>${r.w==null?'':r.w.toFixed(1)}</td><td>${r.h==null?'':r.h.toFixed(1)}</td><td>${r.w&&r.h?(r.w*r.h/10000).toFixed(3):''}</td><td>${r.seam?'125 cm':'-'}</td></tr>`);
+ $('cutlist').innerHTML=t+'</table><p class="note">Mitat cm. Jos sekä leveys että toinen mitta ylittävät 125 cm, pala jaetaan 125 cm:n kohdalta ja saumavaraan lisätään 3 cm.</p>';
+}
+function calc(){
+ if(mode==='lape'){
+  let [a,b]=mat($('B15').value);$('B21').value=a;$('B22').value=b;
+  let w=n('B5'),fh=n('B6')+3.5,bh=n('B7')+3.5,d=n('B8');
+  let rows=[];rows.push(...splitPiece('Etu',w+2,fh));rows.push(...splitPiece('Taka',w+4.5,bh));
+  rows.push(...splitPiece('Sivut',d+3.5,Math.max(fh,bh)));rows.push(...splitPiece('Kansi',w+6.5,d+6.5));
+  if($('B16').value==='Kyllä')rows.push(...splitPiece('Hattu',w+17,d+17));else rows.push({name:'Hattu',w:null,h:null},{name:'Hattu 2',w:null,h:null});
+  if($('B16').value==='Kyllä'){let leg=d<w?d:w;leg+= $('B14').value==='IV'?28:48; rows.push(...splitPiece('Hatun jalka',12,leg));}else rows.push({name:'Hatun jalka',w:null,h:null},{name:'Hatun jalka 2',w:null,h:null});
+  let hemW=w+n('B9')+n('B10')+a, hemL=n('B11')+Math.hypot(d+3.5,fh-bh)+n('B12')+b-3.5;
+  rows.push(...splitPiece('Helma',hemW,hemL));render(rows);drawLape(w,fh,bh,d);
+ }else{
+  let [a,b]=mat($('B41').value);$('B47').value=a;$('B48').value=b;$('B49').value=b*2;
+  let w=n('B29'),d=n('B30'),h1=n('B33')+3.5,h2=n('B34')+3.5;
+  let rows=[];rows.push(...splitPiece('Pääty 1',w+5,h1));rows.push(...splitPiece('Pääty 2',w+5,h2));rows.push(...splitPiece('Sivut',d+2,Math.max(h1,h2)));rows.push(...splitPiece('Kansi',w+6.5,d+6.5));
+  if($('B43').value==='Kyllä')rows.push(...splitPiece('Hattu',w+17,d+17));else rows.push({name:'Hattu',w:null,h:null},{name:'Hattu 2',w:null,h:null});
+  if($('B43').value==='Kyllä'){let leg=Math.min(w,d)+($('B42').value==='IV'?27:47);rows.push(...splitPiece('Hatun jalka',12,leg));}else rows.push({name:'Hatun jalka',w:null,h:null},{name:'Hatun jalka 2',w:null,h:null});
+  let hemW=w+n('B31')+n('B32')+a;
+  let hemL=n('B38')+n('B39')+b*2+Math.hypot(n('B36')+1,n('B35')+3.5)+Math.hypot(n('B37')+1,n('B35')+3.5);
+  rows.push(...splitPiece('Helma',hemW,hemL));render(rows);drawHarja(w,d,n('B33'),n('B34'),n('B35'),n('B36'),n('B37'));
+ }
+}
+function svgBase(content){return `<svg viewBox="0 0 760 430" xmlns="http://www.w3.org/2000/svg"><defs><marker id="a" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8z" fill="#111827"/></marker></defs>${content}</svg>`}
+function line(x1,y1,x2,y2){return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#111827" stroke-width="2"/>`}
+function dim(x1,y1,x2,y2,txt){return `${line(x1,y1,x2,y2)}<text x="${(x1+x2)/2}" y="${(y1+y2)/2-7}" text-anchor="middle" font-size="16">${txt} cm</text>`}
+function drawLape(w,h1,h2,d){
+ let x=150,y=90,scale=Math.min(430/(w||1),220/(Math.max(h1,h2)||1)), W=w*scale,D=d*scale,H1=h1*scale,H2=h2*scale;
+ let poly=`<polygon points="${x},${y+H1} ${x+W},${y+H2} ${x+W},${y+H2-D*.15} ${x},${y+H1-D*.15}" fill="#f8fafc" stroke="#111827" stroke-width="3"/>`;
+ $('drawing').innerHTML=svgBase(poly+dim(x,y+H1+45,x+W,y+H2+45,w)+dim(x-55,y+H1,x-55,y,h1)+dim(x+W+55,y+H2,x+W+55,y,h2)+`<text x="380" y="35" text-anchor="middle" font-size="20" font-weight="bold">Lape – sivupalan mittakuva</text><text x="380" y="405" text-anchor="middle" font-size="17">Syvyys ${d.toFixed(1)} cm</text>`);
+}
+function drawHarja(w,d,h1,h2,hr,e1,e2){
+ let x=110,y=300,scale=Math.min(500/(w||1),230/(Math.max(h1,h2,hr)||1)),W=w*scale,H1=h1*scale,H2=h2*scale,HR=hr*scale,E1=e1*scale;
+ let px=x+E1,py=y-HR;let poly=`<polygon points="${x},${y-H1} ${px},${py} ${x+W},${y-H2} ${x+W},${y}" fill="#f8fafc" stroke="#111827" stroke-width="3"/>`;
+ $('drawing').innerHTML=svgBase(poly+
+ dim(x,y+35,x+W,y+35,w)+dim(x-50,y,x-50,y-H1,h1)+dim(x+W+50,y,x+W+50,y-H2,h2)+dim(px,y+25,px,py,hr)+dim(x,y-80,px,y-80,e1)+dim(px,y-55,x+W,y-55,e2)+
+ `<text x="380" y="30" text-anchor="middle" font-size="20" font-weight="bold">Harja – sivupalan mittakuva</text><text x="380" y="410" text-anchor="middle" font-size="16">Syvyys ${d.toFixed(1)} cm • Harjakohdan korkeus ${hr.toFixed(1)} cm</text>`);
+}
+calc();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+
+<script id="original-measure-drawings-js">
+(function(){
+  function n(id){var e=document.getElementById(id);return e?parseFloat(e.value)||0:0}
+  function v(id){var e=document.getElementById(id);return e?String(e.value||"").toLowerCase():""}
+  function esc(x){return String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+  function svg(w,h,b){return '<svg viewBox="0 0 '+w+' '+h+'" xmlns="http://www.w3.org/2000/svg">'+b+'</svg>'}
+  function H(x1,x2,y,t){
+    return '<line class="md-dim" x1="'+x1+'" y1="'+y+'" x2="'+x2+'" y2="'+y+'"/>'+
+      '<line class="md-dim" x1="'+x1+'" y1="'+(y-5)+'" x2="'+x1+'" y2="'+(y+5)+'"/>'+
+      '<line class="md-dim" x1="'+x2+'" y1="'+(y-5)+'" x2="'+x2+'" y2="'+(y+5)+'"/>'+
+      '<text class="md-t" x="'+((x1+x2)/2)+'" y="'+(y-7)+'" text-anchor="middle">'+esc(t)+' cm</text>';
+  }
+  function V(x,y1,y2,t,a){
+    return '<line class="md-dim" x1="'+x+'" y1="'+y1+'" x2="'+x+'" y2="'+y2+'"/>'+
+      '<line class="md-dim" x1="'+(x-5)+'" y1="'+y1+'" x2="'+(x+5)+'" y2="'+y1+'"/>'+
+      '<line class="md-dim" x1="'+(x-5)+'" y1="'+y2+'" x2="'+(x+5)+'" y2="'+y2+'"/>'+
+      '<text class="md-t" x="'+(x+(a==="end"?-7:7))+'" y="'+((y1+y2)/2)+'" text-anchor="'+a+'" dominant-baseline="middle">'+esc(t)+' cm</text>';
+  }
+  function card(t,b){return '<div class="measure-card"><strong>'+esc(t)+'</strong>'+b+'</div>'}
+  function rect(t,w,h){
+    var W=340,Hh=220,p=55,sc=Math.min((W-2*p)/Math.max(w,1),(Hh-2*p)/Math.max(h,1));
+    var rw=w*sc,rh=h*sc,x=(W-rw)/2,y=(Hh-rh)/2;
+    return card(t,svg(W,Hh,
+      '<rect class="md-line" x="'+x+'" y="'+y+'" width="'+rw+'" height="'+rh+'"/>'+
+      H(x,x+rw,y+rh+28,w.toFixed(1))+V(x+rw+30,y,y+rh,h.toFixed(1),"start")
+    ));
+  }
+  function slope(t,w,ha,hb){
+    var W=390,Hh=250,p=55,sc=Math.min((W-2*p)/Math.max(w,1),(Hh-2*p)/Math.max(ha,hb,1));
+    var bw=w*sc,base=Hh-55,x=45,yA=base-ha*sc,yB=base-hb*sc;
+    return card(t,svg(W,Hh,
+      '<polygon class="md-line" points="'+x+','+base+' '+(x+bw)+','+base+' '+(x+bw)+','+yB+' '+x+','+yA+'"/>'+
+      H(x,x+bw,base+28,w.toFixed(1))+V(x-25,base,yA,ha.toFixed(1),"end")+V(x+bw+25,base,yB,hb.toFixed(1),"start")
+    ));
+  }
+  function ridge(t,w,h1,h2,hr,d1,d2){
+    var W=430,Hh=270,p=45,sc=Math.min((W-2*p)/Math.max(w,1),(Hh-2*p)/Math.max(h1,h2,hr,1));
+    var bw=w*sc,base=Hh-55,x=p,xr=x+d1*sc,yr=base-hr*sc,y1=base-h1*sc,y2=base-h2*sc;
+    return card(t,svg(W,Hh,
+      '<polyline class="md-line" points="'+x+','+base+' '+x+','+y1+' '+xr+','+yr+' '+(x+bw)+','+y2+' '+(x+bw)+','+base+' '+x+','+base+'"/>'+
+      '<line class="md-guide" x1="'+xr+'" y1="'+base+'" x2="'+xr+'" y2="'+yr+'"/>'+
+      H(x,x+bw,base+28,w.toFixed(1))+V(x-25,base,y1,h1.toFixed(1),"end")+V(x+bw+25,base,y2,h2.toFixed(1),"start")+V(xr,base,yr,hr.toFixed(1),"start")+
+      H(x,xr,base+52,d1.toFixed(1))+H(xr,x+bw,base+76,d2.toFixed(1))
+    ));
+  }
+  function draw(){
+    var old=document.getElementById("measure-section"); if(old) old.remove();
+    var sec=document.createElement("section");sec.id="measure-section";sec.className="measure-section";
+    var o="<h2>Mittakuvat</h2><div class='measure-grid'>";
+    var w=n("b5"),f=n("b6"),b=n("b7"),d=n("b8");
+    if(w||f||b||d){
+      o+=rect("Etu",w+2,f+3.5);
+      o+=rect("Taka",w+4.5,b+3.5);
+      o+=slope("Sivu ×2",d+3.5,f+3.5,b+3.5);
+      o+=rect("Kansi",w+6.5,d+6.5);
+      if(v("b16").includes("kyllä")||v("b16").includes("yes")) o+=rect("Hattu",w+17,d+17);
+      var hw=w+n("b9")+n("b10")+n("b21");
+      var hl=n("b11")+Math.hypot(d+3.5,(f+3.5)-(b+3.5))+n("b12")+n("b22")-3.5;
+      o+=rect("Helma",hw,hl);
+    }
+    var W=n("b29"),D=n("b30"),H1=n("b33"),H2=n("b34"),RH=n("b35"),D1=n("b36"),D2=n("b37");
+    if(W||D||H1||H2||RH){
+      o+=ridge("Harjan sivu ×2",D+2,H1+3.5,H2+3.5,RH+3.5,D1+1,D2+1);
+      o+=rect("Pääty 1",W+5,H1+3.5);
+      o+=rect("Pääty 2",W+5,H2+3.5);
+      o+=rect("Kansi",W+6.5,D+6.5);
+      if(v("b43").includes("kyllä")||v("b43").includes("yes")) o+=rect("Hattu",W+17,D+17);
+      var hW=W+n("b31")+n("b32")+n("b47");
+      var hL=n("b38")+n("b39")+n("b49")+Math.hypot(D1+1,RH+3.5)+Math.hypot(D2+1,RH+3.5);
+      o+=rect("Helma",hW,hL);
+    }
+    o+="</div>";
+    sec.innerHTML=o;
+    var target=document.querySelector("main")||document.body;
+    target.appendChild(sec);
+  }
+  document.addEventListener("DOMContentLoaded",function(){
+    draw();
+    document.addEventListener("input",draw);
+    document.addEventListener("change",draw);
+  });
+})();
+</script>
+</body></html>
