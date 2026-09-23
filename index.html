@@ -135,32 +135,36 @@ function rectDraw(title,w,h,extra=''){
  dimH(x,x+W,y+H+45,w.toFixed(1)+' cm')+dimV(x-45,y,y+H,h.toFixed(1)+' cm',-1)+extra);
 }
 function lapeSideDraw(){
- let p=pieces.find(x=>x.name==='Sivut')||pieces[4];
- let w=p.w||1, d=n('B8')+3.5, hi=n('B6')+3.5, lo=n('B7')+3.5;
- let x=140,y=330,sc=Math.min(450/d,220/Math.max(hi,lo)),W=d*sc,H1=hi*sc,H2=lo*sc;
- let poly=`<polygon points="${x},${y-H1} ${x+W},${y-H2} ${x+W},${y} ${x},${y}" fill="#f8fafc" stroke="#111827" stroke-width="3"/>`;
+ let d=n('B8')+3.5,hi=n('B6')+3.5,lo=n('B7')+3.5;
+ let x=145,y=105,sc=Math.min(430/d,220/Math.max(hi,lo)),W=d*sc,H1=hi*sc,H2=lo*sc;
+ let poly=`<polygon points="${x},${y} ${x+W},${y} ${x+W},${y+H2} ${x},${y+H1}" fill="#f8fafc" stroke="#111827" stroke-width="3"/>`;
  return base(txt(380,30,'Lape – sivupalan mittakuva',21,'bold')+poly+
- dimH(x,x+W,y+45,d.toFixed(1)+' cm')+
- dimV(x-55,y-H1,y,hi.toFixed(1)+' cm',-1)+
- dimV(x+W+55,y-H2,y,lo.toFixed(1)+' cm',1)+
- txt(380,430,'Sivupalan korkeus mitataan molemmista päistä',15));
+ dimH(x,x+W,y-35,d.toFixed(1)+' cm')+
+ dimV(x-55,y,y+H1,hi.toFixed(1)+' cm',-1)+
+ dimV(x+W+55,y,y+H2,lo.toFixed(1)+' cm',1)+
+ txt(380,430,'Etupään korkeus • Takapään korkeus • sivupalan leveys',15));
 }
 function harjaSideDraw(){
- let d=n('B30')+2,h1=n('B33')+3.5,h2=n('B34')+3.5,hr=n('B35')+3.5,e1=n('B36'),e2=n('B37');
- let total=e1+e2,sc=Math.min(470/total,210/Math.max(h1,h2,hr)),x=120,y=330,W=total*sc,H1=h1*sc,H2=h2*sc,HR=hr*sc,XP=x+e1*sc;
- let poly=`<polygon points="${x},${y-H1} ${XP},${y-HR} ${x+W},${y-H2} ${x+W},${y} ${x},${y}" fill="#f8fafc" stroke="#111827" stroke-width="3"/>`;
+ let total=n('B30')+2, h1=n('B33')+3.5,h2=n('B34')+3.5,hr=n('B35')+3.5,e1=n('B36'),e2=n('B37');
+ if(total<=0) total=e1+e2;
+ let sc=Math.min(470/total,210/Math.max(h1,h2,hr)),x=115,y=100,W=total*sc,H1=h1*sc,H2=h2*sc,HR=hr*sc,XP=x+e1*sc;
+ let poly=`<polygon points="${x},${y} ${XP},${y+HR} ${x+W},${y} ${x+W},${y+H2} ${x},${y+H1}" fill="#f8fafc" stroke="#111827" stroke-width="3"/>`;
  return base(txt(380,28,'Harja – sivupalan mittakuva',21,'bold')+poly+
- dimH(x,x+W,y+42,total.toFixed(1)+' cm')+
- dimH(x,XP,y+78,e1.toFixed(1)+' cm')+
- dimH(XP,x+W,y+78,e2.toFixed(1)+' cm')+
- dimV(x-52,y-H1,y,h1.toFixed(1)+' cm',-1)+
- dimV(XP+52,y-HR,y,hr.toFixed(1)+' cm',1)+
- dimV(x+W+52,y-H2,y,h2.toFixed(1)+' cm',1)+
+ dimH(x,x+W,y-35,total.toFixed(1)+' cm')+
+ dimH(x,XP,y-70,e1.toFixed(1)+' cm')+
+ dimH(XP,x+W,y-70,e2.toFixed(1)+' cm')+
+ dimV(x-52,y,y+H1,h1.toFixed(1)+' cm',-1)+
+ dimV(XP+52,y,y+HR,hr.toFixed(1)+' cm',1)+
+ dimV(x+W+52,y,y+H2,h2.toFixed(1)+' cm',1)+
  txt(380,435,'1. päädyn korkeus • 2. päädyn korkeus • harjakohdan korkeus',15));
 }
 function drawAll(){
  const visible=pieces.filter(p=>p.w!=null&&p.h!=null&&p.w>0&&p.h>0);
- $('allDrawings').innerHTML=visible.map(p=>{
+ let summary='';
+ if(mode==='harja'){
+   summary=`<div class="pieceinfo"><b>Harjan mitat:</b> leveys ${n('B29').toFixed(1)} cm, syvyys ${n('B30').toFixed(1)} cm, 1. pääty ${n('B33').toFixed(1)} cm, 2. pääty ${n('B34').toFixed(1)} cm, harjakohta ${n('B35').toFixed(1)} cm, etäisyydet ${n('B36').toFixed(1)} + ${n('B37').toFixed(1)} cm.</div>`;
+ }
+ $('allDrawings').innerHTML=summary+visible.map(p=>{
    let svg;
    if(mode==='lape'&&p.shape==='lapeSide'&&!p.name.endsWith(' 2'))svg=lapeSideDraw();
    else if(mode==='harja'&&p.shape==='harjaSide'&&!p.name.endsWith(' 2'))svg=harjaSideDraw();
